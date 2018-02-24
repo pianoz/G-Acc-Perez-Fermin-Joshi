@@ -1,14 +1,24 @@
+
+import socket
 import pygame
-import argparse
 import math
-from pythonosc import dispatcher
-from pythonosc import osc_server
+
 
 self = pygame.init()
 rbound = 1000
 hbound = 1000
 screen = pygame.display.set_mode((rbound, hbound))
 imagemap = pygame.image.load('map.png')
+dir = 0;
+
+
+UDP_IP = "127.0.0.1"
+UDP_PORT = 5005
+
+sock = socket.socket(socket.AF_INET, # Internet
+                     socket.SOCK_DGRAM) # UDP
+sock.bind((UDP_IP, UDP_PORT))
+
 
 # Game code here, this currently works with keys for testing.
 
@@ -26,31 +36,33 @@ def main(self, screen):
 
     while 1:
 
+
+
         'active keypressing'
         keys = pygame.key.get_pressed()
 
         'moving left'
-        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
+        if keys[pygame.K_a] or keys[pygame.K_LEFT] or dir == 1:
             dval = 0
             'left boundary and movement'
             if imagex > 0:
                 imagex = imagex - 3
 
         'moving right'
-        if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+        if keys[pygame.K_d] or keys[pygame.K_RIGHT] or dir == 2:
             dval = 1
             'setting boundaries and then movement'
             if imagex < rbound:
                 imagex = imagex + 3
 
         'moving up'
-        if keys[pygame.K_w] or keys[pygame.K_UP]:
+        if keys[pygame.K_w] or keys[pygame.K_UP] or dir == 3:
             dval = 2
             if imagey < rbound:
                 imagey = imagey - 3
 
         'moving down'
-        if keys[pygame.K_s] or keys[pygame.K_DOWN]:
+        if keys[pygame.K_s] or keys[pygame.K_DOWN] or dir == 4:
             dval = 3
             if imagey > 0:
                 imagey = imagey + 3
@@ -75,41 +87,9 @@ def main(self, screen):
             screen.blit(imagedown, (imagex, imagey))
         pygame.display.flip()
 
+        data, addr = sock.recvfrom(1024)  # buffer size is 1024 bytes
+        if 
+        print("received message:", data)
 
-# This is code to listen to osc data, I'm having trouble with the following part, and I'm not
-# ...sure if it is due to the IP i've given it, or if it is something deeper. Some help would be
-# ...greatly appreaciated.
-
-def print_volume_handler(unused_addr, args, volume):
-    print("[{0}] ~ {1}".format(args[0], volume))
-
-
-def print_compute_handler(unused_addr, args, volume):
-    try:
-        print("[{0}] ~ {1}".format(args[0], args[1](volume)))
-    except ValueError:
-        pass
-
-
-# Replace ip and port in here, this calls the game and makes sure messages come in,
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--ip",
-                        default="127.0.0.1", help="The ip to listen on")
-    parser.add_argument("--port",
-                        type=int, default=12000, help="The port to listen on")
-    args = parser.parse_args()
-
-    dispatcher = dispatcher.Dispatcher()
-    dispatcher.map("/filter", print)
-    dispatcher.map("/volume", print_volume_handler, "Volume")
-    dispatcher.map("/logvolume", print_compute_handler, "Log volume", math.log)
-
-    server = osc_server.ThreadingOSCUDPServer(
-        (args.ip, args.port), dispatcher)
-    print("Serving on {}".format(server.server_address))
-    main(self, screen)
-    server.serve_forever()
-
+main(self,screen)
 

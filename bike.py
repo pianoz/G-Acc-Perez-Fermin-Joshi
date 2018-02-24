@@ -88,7 +88,6 @@ def main(self, screen):
         pygame.display.flip()
 
         data, addr = sock.recvfrom(1024)  # buffer size is 1024 bytes
-        if 
         print("received message:", data)
 
 main(self,screen)
